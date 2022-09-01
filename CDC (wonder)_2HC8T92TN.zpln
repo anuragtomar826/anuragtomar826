@@ -1,0 +1,354 @@
+﻿{
+  "paragraphs": [
+    {
+      "title": "List  S3 directory for csv files",
+      "text": "%pyspark\r\nimport boto\r\nimport pandas as pd\r\ndef listdir_frombucket(bucket,dir_name):\r\n        s3_host=\"s3.amazonaws.com\"\r\n        s3 = boto.connect_s3(host=s3_host)\r\n        bucketlist = s3.get_bucket(bucket)\r\n        files_cdc=[]\r\n        #print(files_cdc)\r\n        for o in bucketlist.list():\r\n             if dir_name in o.name :\r\n                if \"data_dict\" not in o.name:\r\n                   if 'temp' not in o.name:\r\n                      if \"validation\" not in o.name:\r\n                            if \".csv\" in o.name:\r\n                                files_cdc.append(o.name)\r\n                              # print(files_cdc)\r\n        return files_cdc\r\n        \r\nfiles_list=listdir_frombucket(\"emerald-payor-dev-s3-etllandingzone-1\",\"CMS_Public/CDC/data/\")\r\nfiles_list",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-29T10:50:59+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "['CMS_Public/CDC/data/cdc (wonder) dataset.csv']\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661507483434_365106883",
+      "id": "paragraph_1661507483434_365106883",
+      "dateCreated": "2022-08-26T09:51:23+0000",
+      "dateStarted": "2022-08-29T10:50:59+0000",
+      "dateFinished": "2022-08-29T10:50:59+0000",
+      "status": "FINISHED",
+      "focus": true,
+      "$$hashKey": "object:1595"
+    },
+    {
+      "title": "Validation of csv file to check if there is data present",
+      "text": "%pyspark\nbucket = \"emerald-payor-dev-s3-etllandingzone-1\"\ndir = \"CMS_Public/CDC/data/\"\nfiles_list=listdir_frombucket(bucket, dir)\n\npath_ers=\"s3://\"+bucket\nfiles_data = []\n\nfor file in files_list:\n    df=pd.read_csv(path_ers + '/' + file, header=1)\n    rows_count = df.shape[0]\n    cols_count = df.shape[1]\n\n    if rows_count > 0  and cols_count > 0:\n        files_data.append([file, 'Valid', rows_count, cols_count])\n    else:\n        files_data.append([file, 'Invalid', rows_count, cols_count])\n        \ndf_validation = pd.DataFrame(files_data)\ndf_validation.columns = ['Filename', 'Status', 'Rowcount', 'Columncount']\n\n\nprint(df_validation)",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-29T10:50:59+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "                                       Filename Status  Rowcount  Columncount\n0  CMS_Public/CDC/data/cdc (wonder) dataset.csv  Valid      6769           11\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661508918242_1371130648",
+      "id": "paragraph_1661508918242_1371130648",
+      "dateCreated": "2022-08-26T10:15:18+0000",
+      "dateStarted": "2022-08-29T10:50:59+0000",
+      "dateFinished": "2022-08-29T10:50:59+0000",
+      "status": "FINISHED",
+      "$$hashKey": "object:1596"
+    },
+    {
+      "title": "Validation to check file metadata",
+      "text": "%pyspark\nbucket = \"emerald-payor-dev-s3-etllandingzone-1\"\ndir = \"CMS_Public/CDC/data/\"\nfiles_list=listdir_frombucket(bucket, dir)\npath_cdc=\"s3://\"+bucket\n\nfiles_metadata = []\n\nfor file in files_list:\n    df=pd.read_csv(path_cdc + '/' + file, header=0)\n    cols = df.columns\n    for col in cols:\n        files_metadata.append([file.replace(dir, ''), col, df.dtypes[col]])\n\ndf_validation_metdata = pd.DataFrame(files_metadata)\ndf_validation_metdata.columns = ['Table_Name', 'Column_Name', 'Data_Type']\n\nprint(df_validation_metdata)",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-29T10:50:59+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 121.688,
+              "optionOpen": false
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "                  Table_Name                   Column_Name Data_Type\n0   cdc (wonder) dataset.csv                         State    object\n1   cdc (wonder) dataset.csv                    State Code     int64\n2   cdc (wonder) dataset.csv                        County    object\n3   cdc (wonder) dataset.csv                   County Code     int64\n4   cdc (wonder) dataset.csv                          Year     int64\n5   cdc (wonder) dataset.csv                     Year Code     int64\n6   cdc (wonder) dataset.csv       Multiple Cause of death    object\n7   cdc (wonder) dataset.csv  Multiple Cause of death Code    object\n8   cdc (wonder) dataset.csv                        Deaths     int64\n9   cdc (wonder) dataset.csv                    Population     int64\n10  cdc (wonder) dataset.csv                    Crude Rate    object\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661511647792_2097509912",
+      "id": "paragraph_1661511647792_2097509912",
+      "dateCreated": "2022-08-26T11:00:47+0000",
+      "dateStarted": "2022-08-29T10:50:59+0000",
+      "dateFinished": "2022-08-29T10:51:00+0000",
+      "status": "FINISHED",
+      "$$hashKey": "object:1597"
+    },
+    {
+      "title": "Checking master file with data dictionary",
+      "text": "%pyspark\npd.set_option('display.max_columns', 999)\nbucket = \"emerald-payor-dev-s3-etllandingzone-1\"\ndir_dict = \"CMS_Public/CDC/data_dict/CDC (wonder) data dictionary1.csv\"\nfiles_list=listdir_frombucket(bucket, dir)\npath_cdc_dict=\"s3://\"+bucket + '/' + dir_dict\n\ndf_dict = pd.read_csv(path_cdc_dict)\n\ndf_compare = df_dict.merge(df_validation_metdata, on = 'Column_Name' , how = 'outer').sort_values('Table_Name')\ndf_compare['datatype_valid'] = df_compare.Data_Type_x == df_compare.Data_Type_y  \ndf_compare['column_missing'] = df_compare.Data_Type_y.isnull()\nprint(df_compare.head(100))\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-29T10:51:00+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "                     Column_Name Data_Type_x                Table_Name  \\\n0                          State      object  cdc (wonder) dataset.csv   \n1                     State Code       int64  cdc (wonder) dataset.csv   \n2                         County      object  cdc (wonder) dataset.csv   \n3                    County Code       int64  cdc (wonder) dataset.csv   \n4                           Year       int64  cdc (wonder) dataset.csv   \n5                      Year Code       int64  cdc (wonder) dataset.csv   \n6        Multiple Cause of death      object  cdc (wonder) dataset.csv   \n7   Multiple Cause of death Code      object  cdc (wonder) dataset.csv   \n8                         Deaths       int64  cdc (wonder) dataset.csv   \n9                     Population       int64  cdc (wonder) dataset.csv   \n10                    Crude Rate      object  cdc (wonder) dataset.csv   \n\n   Data_Type_y  datatype_valid  column_missing  \n0       object            True           False  \n1        int64            True           False  \n2       object            True           False  \n3        int64            True           False  \n4        int64            True           False  \n5        int64            True           False  \n6       object            True           False  \n7       object            True           False  \n8        int64            True           False  \n9        int64            True           False  \n10      object            True           False  \n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661511842749_271267414",
+      "id": "paragraph_1661511842749_271267414",
+      "dateCreated": "2022-08-26T11:04:02+0000",
+      "dateStarted": "2022-08-29T10:51:00+0000",
+      "dateFinished": "2022-08-29T10:51:00+0000",
+      "status": "FINISHED",
+      "$$hashKey": "object:1598"
+    },
+    {
+      "title": "Function : get_unmatch_county_code and_state_code",
+      "text": "  %pyspark\n  #check for state level data\nmapping = pd.read_csv(\"s3://emerald-payor-dev-s3-etllandingzone-1/CMS_Public/CDC/data_dict/state and state code.csv\",header=0)\nmapping = mapping[['State']]\nmapping['State']= mapping['State'].str.lower()\nmapping.head()\n\nbucket = \"emerald-payor-dev-s3-etllandingzone-1\"\ndir = \"CMS_Public/CDC/data/\"\nfiles_list=listdir_frombucket(bucket, dir)\n\npath_cdc=\"s3://\"+bucket\nfiles_data = []\nerror_set = []\n\nfor file in files_list:\n    df=pd.read_csv(path_cdc + '/' + file, header=0)\n    #df.head()\n    df['State'] = df['State'].str.lower() \n    df1 = df.merge(mapping, left_on='State', right_on='State',  how='left')\n    df1['Invalid_state'] = df1['State'].isnull()\n    df2 = df1[df1['Invalid_state'] == True]\n    df2['filename'] = file\n    df2 = df2[['filename', 'State Code', 'Invalid_state']]\n    df2= df2.fillna('')\n    error_set.append(df2)\ndf_error_states = pd.concat(error_set)\ndf_error_states.head()\n\n\n\n# check for county level data\ncountydata=pd.read_csv(\"s3://emerald-payor-dev-s3-etllandingzone-1/CMS_Public/CDC/data_dict/county and county code.csv\",header=0)\n#countydata.head()\ncountydata['County']= countydata['County'].str.lower()\n\nbucket = \"emerald-payor-dev-s3-etllandingzone-1\"\ndir = \"CMS_Public/CDC/data/\"\nfiles_list=listdir_frombucket(bucket, dir)\n\npath_cdc=\"s3://\"+bucket\nfiles_data = []\n\n\nerror_set = []\n\nfor file in files_list:\n    df=pd.read_csv(path_cdc + '/' + file, sep = ',', header=0)\n    df.head()\n    df = df[['County']].drop_duplicates()\n    df['County']= df['County'].str.lower()\n    \n    df1= df.merge(countydata, left_on ='County', right_on= 'County', how= 'left')\n    df1['valid_county'] = df1['County'] == df1['County']\n    df2 = df1[df1['valid_county'] == False]\n    df2 = df2[['County']].drop_duplicates()\n    df2['filename'] = file\n    df2['Invalid_county'] = True\n    error_set.append(df2)\n\ndf_error_county = pd.concat(error_set)\n\ndf_error_states.to_csv(\"s3://emerald-payor-dev-s3-etllandingzone-1/CMS_Public/CDC/Validations/error_state_cdc.csv\")\ndf_error_county.to_csv((\"s3://emerald-payor-dev-s3-etllandingzone-1/CMS_Public/CDC/Validations/error_county_cdc.csv\"))\nprint(df_error_states)\nprint(df_error_county)\n\n\n\n\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-29T11:46:22+0000",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "editorHide": false,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Empty DataFrame\nColumns: [filename, State Code, Invalid_state]\nIndex: []\nEmpty DataFrame\nColumns: [County, filename, Invalid_county]\nIndex: []\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661595854255_1154761688",
+      "id": "paragraph_1661595854255_1154761688",
+      "dateCreated": "2022-08-27T10:24:14+0000",
+      "dateStarted": "2022-08-29T11:46:22+0000",
+      "dateFinished": "2022-08-29T11:46:23+0000",
+      "status": "FINISHED",
+      "$$hashKey": "object:1599"
+    },
+    {
+      "title": "moving file to staging after removing whitespace",
+      "text": "%pyspark\nfrom pyspark.sql import functions as fun\ndef moving_files(bucket,dir_name):\n    main_files=listdir_frombucket(bucket,dir_name)\n    path_map=\"s3://\"+bucket\n    \n    for i in main_files:\n        print(i)\n        df_trim=spark.read.csv(path_map+'/'+i,header=True,inferSchema=True)\n        \n        df_trim.toPandas().to_csv(\"s3://emerald-payor-dev-s3-etlstagingzone-1/\"+i,index=False)\ndir_name=\"CMS_Public/CDC/data/\"\nmoving_files(\"emerald-payor-dev-s3-etllandingzone-1\",dir_name)\n        ",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-30T04:58:29+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "CMS_Public/CDC/data/cdc (wonder) dataset.csv\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://ip-172-31-55-250.ec2.internal:4040/jobs/job?id=115",
+              "$$hashKey": "object:1791"
+            },
+            {
+              "jobUrl": "http://ip-172-31-55-250.ec2.internal:4040/jobs/job?id=116",
+              "$$hashKey": "object:1792"
+            },
+            {
+              "jobUrl": "http://ip-172-31-55-250.ec2.internal:4040/jobs/job?id=117",
+              "$$hashKey": "object:1793"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661752743860_117344741",
+      "id": "paragraph_1661752743860_117344741",
+      "dateCreated": "2022-08-29T05:59:03+0000",
+      "dateStarted": "2022-08-30T04:58:29+0000",
+      "dateFinished": "2022-08-30T04:58:38+0000",
+      "status": "FINISHED",
+      "$$hashKey": "object:1600"
+    },
+    {
+      "text": "%pyspark\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-08-29T10:51:01+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661767735480_341244870",
+      "id": "paragraph_1661767735480_341244870",
+      "dateCreated": "2022-08-29T10:08:55+0000",
+      "dateStarted": "2022-08-29T10:51:01+0000",
+      "dateFinished": "2022-08-29T10:51:01+0000",
+      "status": "FINISHED",
+      "$$hashKey": "object:1601"
+    }
+  ],
+  "name": "CDC (wonder)",
+  "id": "2HC8T92TN",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.10.0",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false,
+    "looknfeel": "default",
+    "personalizedMode": "false"
+  },
+  "info": {
+    "isRunning": false
+  },
+  "path": "/CDC (wonder)"
+}
